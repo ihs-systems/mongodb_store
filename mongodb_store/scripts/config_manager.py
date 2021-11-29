@@ -87,6 +87,8 @@ class ConfigManager(object):
         robot_name="smartgv"
         use_daemon = rospy.get_param('mongodb_use_daemon', False)
         connection_string = rospy.get_param('/mongodb_connection_string', '')
+        robot_name = rospy.get_param('~robot_name', 'robot')
+
         use_connection_string = len(connection_string) > 0
         if use_connection_string:
             use_daemon = True
@@ -94,6 +96,7 @@ class ConfigManager(object):
 
         db_host = rospy.get_param('mongodb_host')
         db_port = rospy.get_param('mongodb_port')
+
         if use_daemon:
             if use_connection_string:
                 is_daemon_alive = mongodb_store.util.check_connection_to_mongod(
@@ -114,6 +117,10 @@ class ConfigManager(object):
 
         rospy.on_shutdown(self._on_node_shutdown)
 
+<<<<<<< HEAD
+=======
+        #self._database = self._mongo_client.config
+>>>>>>> Support to store configuration for multiple robots
         self._database = self._mongo_client[robot_name]
         self._database.add_son_manipulator(MongoTransformer())
 
@@ -162,10 +169,12 @@ class ConfigManager(object):
             for f in files:
                 if not f.endswith(".yaml"):
                     continue
-                params = rosparam.load_file(os.path.join(path, f))
+                params = rosparam.load_file(
+                    os.path.join(path, f))
                 rospy.loginfo("Found default parameter file %s" % f)
                 for p, n in params:
-                    defaults.extend(flatten(p, c="", f_name=f))
+                    ns = '/' + robot_name
+                    defaults.extend(flatten(p, c=ns, f_name=f))
 
             # Copy the defaults into the DB if not there already
             defaults_collection = self._database.defaults
@@ -175,8 +184,13 @@ class ConfigManager(object):
                 if existing is None:
                     rospy.loginfo("New default parameter for %s" % param)
                     defaults_collection.insert_one({"path": param,
+<<<<<<< HEAD
                                                 "value": val,
                                                 "from_file": filename})
+=======
+                                                    "value": val,
+                                                    "from_file": filename})
+>>>>>>> Support to store configuration for multiple robots
                 elif existing["from_file"] != filename:
                     rospy.logerr("Two defaults parameter files have the same key:\n%s and %s, key %s" %
                                  (existing["from_file"], filename, param))
@@ -264,6 +278,10 @@ class ConfigManager(object):
     # but one day might not back onto the parameter server...
     def _getparam_srv_cb(self, req):
         response = GetParamResponse()
+<<<<<<< HEAD
+=======
+        #config_db = self._mongo_client.config
+>>>>>>> Support to store configuration for multiple robots
         config_db = self._database
         value = config_db.local.find_one({"path": req.param_name})
         if value is None:
