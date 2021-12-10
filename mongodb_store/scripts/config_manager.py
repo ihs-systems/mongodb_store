@@ -84,6 +84,7 @@ class ConfigManager(object):
     def __init__(self):
         rospy.init_node("config_manager")
 
+        robot_name="smartgv"
         use_daemon = rospy.get_param('mongodb_use_daemon', False)
         connection_string = rospy.get_param('/mongodb_connection_string', '')
         use_connection_string = len(connection_string) > 0
@@ -113,7 +114,7 @@ class ConfigManager(object):
 
         rospy.on_shutdown(self._on_node_shutdown)
 
-        self._database = self._mongo_client.config
+        self._database = self._mongo_client[robot_name]
         self._database.add_son_manipulator(MongoTransformer())
 
         # Load the default settings from the defaults/ folder
@@ -173,7 +174,7 @@ class ConfigManager(object):
                     {"path": param}, manipulate=False)
                 if existing is None:
                     rospy.loginfo("New default parameter for %s" % param)
-                    defaults_collection.insert({"path": param,
+                    defaults_collection.insert_one({"path": param,
                                                 "value": val,
                                                 "from_file": filename})
                 elif existing["from_file"] != filename:
@@ -263,7 +264,7 @@ class ConfigManager(object):
     # but one day might not back onto the parameter server...
     def _getparam_srv_cb(self, req):
         response = GetParamResponse()
-        config_db = self._mongo_client.config
+        config_db = self._database
         value = config_db.local.find_one({"path": req.param_name})
         if value is None:
             value = config_db.defaults.find_one({"path": req.param_name})
@@ -301,7 +302,7 @@ class ConfigManager(object):
             {"path": new["path"]}, manipulate=False)
         if value is None:
             # insert it
-            config_db_local.insert(new)
+            config_db_local.insert_one(new)
         else:
             # update it
             new['_id'] = value['_id']
@@ -325,7 +326,7 @@ class ConfigManager(object):
             {"path": new["path"]}, manipulate=False)
         if value is None:
             # insert it
-            config_db_local.insert(new)
+            config_db_local.insert_one(new)
         else:
             # update it
             new['_id'] = value['_id']
