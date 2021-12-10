@@ -27,7 +27,6 @@ from datetime import datetime
 def check_connection_to_mongod(db_host, db_port, connection_string=None):
     """
     Check connection to mongod server
-
     :Returns:
         | bool : True on success, False if connection is not established.
     """
@@ -67,7 +66,6 @@ def check_connection_to_mongod(db_host, db_port, connection_string=None):
 def wait_for_mongo(timeout=60, ns="/datacentre"):
     """
     Waits for the mongo server, as started through the mongodb_store/mongodb_server.py wrapper
-
     :Returns:
         | bool : True on success, False if server not even started.
     """
@@ -86,7 +84,6 @@ def wait_for_mongo(timeout=60, ns="/datacentre"):
 def check_for_pymongo():
     """
     Checks for required version of pymongo python library.
-
     :Returns:
         | bool : True if found, otherwise Fale
     """
@@ -105,7 +102,6 @@ def check_for_pymongo():
 Pick an object to use as MongoClient based on the currently installed pymongo
 version. Use this instead of importing Connection or MongoClient from pymongo
 directly.
-
 Example:
     MongoClient = util.importMongoClient()
 """
@@ -164,12 +160,10 @@ def document_to_msg(document, TYPE):
 def msg_to_document(msg):
     """
     Given a ROS message, turn it into a (nested) dictionary suitable for the datacentre.
-
     >>> from geometry_msgs.msg import Pose
     >>> msg_to_document(Pose())
     {'orientation': {'w': 0.0, 'x': 0.0, 'y': 0.0, 'z': 0.0},
     'position': {'x': 0.0, 'y': 0.0, 'z': 0.0}}
-
     :Args:
         | msg (ROS Message): An instance of a ROS message to convert
     :Returns:
@@ -193,10 +187,8 @@ def msg_to_document(msg):
 def sanitize_value(attr, v, type):
     """
     De-rosify a msg.
-
     Internal function used to convert ROS messages into dictionaries of pymongo insertable
     values.
-
     :Args:
         | attr(str): the ROS message slot name the value came from
         | v: the value from the message's slot to make into a MongoDB able type
@@ -218,7 +210,8 @@ def sanitize_value(attr, v, type):
             # ensure unicode
             try:
                 if _PY3:
-                    v = str(v, "utf-8")
+                    #v = str(v, "utf-8")
+                    v = str(v)
                 else:
                     v = unicode(v, "utf-8")
             except UnicodeDecodeError as e:
@@ -248,7 +241,6 @@ def sanitize_value(attr, v, type):
 def store_message(collection, msg, meta, oid=None):
     """
     Update ROS message into the DB
-
     :Args:
         | collection (pymongo.Collection): the collection to store the message in
         | msg (ROS message): an instance of a ROS message to store
@@ -288,7 +280,6 @@ def store_message(collection, msg, meta, oid=None):
 def store_message_no_meta(collection, msg):
     """
     Store a ROS message sans meta data.
-
     :Args:
         | collection (pymongo.Collection): The collection to store the message in
         | msg (ROS message): An instance of a ROS message to store
@@ -302,13 +293,10 @@ def store_message_no_meta(collection, msg):
 def fill_message(message, document):
     """
     Fill a ROS message from a dictionary, assuming the slots of the message are keys in the dictionary.
-
     :Args:
         | message (ROS message): An instance of a ROS message that will be filled in
         | document (dict): A dicionary containing all of the message attributes
-
     Example:
-
     >>> from geometry_msgs.msg import Pose
     >>> d = dcu.msg_to_document(Pose())
     >>> d['position']['x']=27.0
@@ -357,16 +345,12 @@ def fill_message(message, document):
 def dictionary_to_message(dictionary, cls):
     """
     Create a ROS message from the given dictionary, using fill_message.
-
     :Args:
         | dictionary (dict): A dictionary containing all of the atributes of the message
         | cls (class): The python class of the ROS message type being reconstructed.
     :Returns:
         An instance of cls with the attributes filled.
-
-
     Example:
-
     >>> from geometry_msgs.msg import Pose
     >>> d = {'orientation': {'w': 0.0, 'x': 0.0, 'y': 0.0, 'z': 0.0},
        'position': {'x': 27.0, 'y': 0.0, 'z': 0.0}}
@@ -391,7 +375,6 @@ def dictionary_to_message(dictionary, cls):
 def query_message(collection, query_doc, sort_query=[], projection_query={}, find_one=False, limit=0):
     """
     Peform a query for a stored messages, returning results in list.
-
     :Args:
         | collection (pymongo.Collection): The collection to query
         | query_doc (dict): The MongoDB query to execute
@@ -434,7 +417,6 @@ def query_message(collection, query_doc, sort_query=[], projection_query={}, fin
 def update_message(collection, query_doc, msg, meta, upsert):
     """
     Update ROS message in the DB, return updated id and true if db altered.
-
     :Args:
         | collection (pymongo.Collection): The collection to update in
         | query_doc (dict): The MongoDB query to execute to select document for update
@@ -477,7 +459,6 @@ def update_message(collection, query_doc, msg, meta, upsert):
 def query_message_ids(collection, query_doc, find_one):
     """
     Peform a query for a stored message, returning a tuple of id strings
-
     :Args:
         | collection (pymongo.Collection): The collection to search
         | query_doc (dict): The MongoDB query to execute
@@ -496,12 +477,9 @@ def query_message_ids(collection, query_doc, find_one):
 def type_to_class_string(type):
     """
     Takes a ROS msg type and turns it into a Python module and class name.
-
     E.g
-
     >>> type_to_class_string("geometry_msgs/Pose")
     geometry_msgs.msg._Pose.Pose
-
     :Args:
         | type (str): The ROS message type to return class string
     :Returns:
@@ -516,7 +494,6 @@ def load_class(full_class_string):
     """
     Dynamically load a class from a string
     shamelessly ripped from: http://thomassileo.com/blog/2012/12/21/dynamically-load-python-modules-or-classes/
-
     :Args:
         | full_class_string (str): The python class to dynamically load
     :Returns:
@@ -534,7 +511,6 @@ def load_class(full_class_string):
 def serialise_message(message):
     """
     Create a mongodb_store_msgs/SerialisedMessage instance from a ROS message.
-
     :Args:
         | message (ROS message): The message to serialise
     :Returns:
@@ -552,7 +528,6 @@ def serialise_message(message):
 def deserialise_message(serialised_message):
     """
     Create a ROS message from a mongodb_store_msgs/SerialisedMessage
-
     :Args:
         | serialised_message (mongodb_store_msgs.msg.SerialisedMessage): The message to deserialise
     :Returns:
@@ -570,7 +545,6 @@ def deserialise_message(serialised_message):
 def string_pair_list_to_dictionary_no_json(spl):
     """
     Covert a mongodb_store_msgs/StringPairList into a dictionary, ignoring content
-
     :Args:
         | spl (StringPairList): The list of (key, value) to pairs convert
     :Returns:
@@ -583,7 +557,6 @@ def string_pair_list_to_dictionary(spl):
     """
     Creates a dictionary from a mongodb_store_msgs/StringPairList which could contain JSON as a string.
     If the first entry in the supplied list is a JSON query then the returned dictionary is loaded from that.
-
     :Args:
         | spl (StringPairList): The list of (key, value) pairs to convert
     :Returns:
