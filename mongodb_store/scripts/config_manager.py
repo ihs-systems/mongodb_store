@@ -117,10 +117,7 @@ class ConfigManager(object):
 
         rospy.on_shutdown(self._on_node_shutdown)
 
-<<<<<<< HEAD
-=======
         #self._database = self._mongo_client.config
->>>>>>> Support to store configuration for multiple robots
         self._database = self._mongo_client[robot_name]
         self._database.add_son_manipulator(MongoTransformer())
 
@@ -184,13 +181,8 @@ class ConfigManager(object):
                 if existing is None:
                     rospy.loginfo("New default parameter for %s" % param)
                     defaults_collection.insert_one({"path": param,
-<<<<<<< HEAD
-                                                "value": val,
-                                                "from_file": filename})
-=======
                                                     "value": val,
                                                     "from_file": filename})
->>>>>>> Support to store configuration for multiple robots
                 elif existing["from_file"] != filename:
                     rospy.logerr("Two defaults parameter files have the same key:\n%s and %s, key %s" %
                                  (existing["from_file"], filename, param))
@@ -278,10 +270,7 @@ class ConfigManager(object):
     # but one day might not back onto the parameter server...
     def _getparam_srv_cb(self, req):
         response = GetParamResponse()
-<<<<<<< HEAD
-=======
         #config_db = self._mongo_client.config
->>>>>>> Support to store configuration for multiple robots
         config_db = self._database
         value = config_db.local.find_one({"path": req.param_name})
         if value is None:
